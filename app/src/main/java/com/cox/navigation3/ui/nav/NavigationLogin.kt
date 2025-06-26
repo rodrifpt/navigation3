@@ -1,0 +1,58 @@
+package com.cox.navigation3.ui.nav
+
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entry
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
+import com.cox.navigation3.ui.nav.DestinationRoute.Dashboard
+import com.cox.navigation3.ui.nav.DestinationRoute.Login
+import com.cox.navigation3.ui.screens.LoginScreen
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun <T : NavKey> NavigationLogin(startKey: T) {
+    val backStack = rememberNavBackStack(startKey)
+
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSceneSetupNavEntryDecorator(),
+            rememberSavedStateNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        transitionSpec = {
+            ContentTransform(
+                slideInHorizontally(initialOffsetX = { it }),
+                slideOutHorizontally()
+            )
+        },
+        popTransitionSpec = {
+            ContentTransform(
+                slideInHorizontally(),
+                slideOutHorizontally(targetOffsetX = { it })
+            )
+        },
+        sceneStrategy = rememberListDetailSceneStrategy(),
+        entryProvider = entryProvider {
+            entry<Login>{
+                LoginScreen(onNavigate = {
+                    backStack.add(Dashboard)
+                    backStack.remove(Login)
+                })
+            }
+            entry<Dashboard> {
+                BottomMenuNavigation()
+            }
+        }
+    )
+}
